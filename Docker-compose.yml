@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+
+  redpanda:
+    build: ./redpanda
+    container_name: redpanda
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "info", "--brokers", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  create-topic:
+    image: redpandadata/redpanda:latest
+    container_name: create-topic
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint: >
+      rpk topic create client_tickets
+      --brokers redpanda:9092
+    restart: "no"
+
+  producer:
+    build: ./producer
+    container_name: producer
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    environment:
+      - BROKER=redpanda:9092
+      - TOPIC=client_tickets
+      - NB_TICKETS=20
+    restart: "no"
+
+  consumer:
+    build: ./consumer
+    container_name: consumer
+    depends_on:
+      - producer
+    environment:
+      - BROKER=redpanda:9092
+      - TOPIC=client_tickets
+    restart: "no"
