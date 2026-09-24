@@ -29,5 +29,7 @@ Modeliser et deployer une infrastructure de streaming de donnees temps reel dans
 
 docker-compose up -d
 
+## Résultats
+    Traitement de flux temps réel producteur/consommateur
 ---
 Formation Data Engineer - OpenClassrooms
